@@ -482,11 +482,21 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 	},
 
 	_getMiddleLatLng: function (marker1, marker2) {
+		const latLng1 = marker1.getLatLng();
+		const latLng2 = marker2.getLatLng();
 		var map = this._poly._map,
-			p1 = map.project(marker1.getLatLng()),
-			p2 = map.project(marker2.getLatLng());
+			p1 = map.project(latLng1),
+			p2 = map.project(latLng2);
 
-		return map.unproject(p1._add(p2)._divideBy(2));
+		const middle = map.unproject(p1._add(p2)._divideBy(2));
+		if (latLng1.alt && latLng2.alt) {
+			if ("getAltitudeAtLatLng" in map) {
+				return new L.LatLng(middle.lat, middle.lng, map.getAltitudeAtLatLng(middle));
+			}
+
+			return new L.LatLng(middle.lat, middle.lng, (latLng1.alt + latLng2.alt)/2);
+		}
+		return middle;
 	}
 });
 

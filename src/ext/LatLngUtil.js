@@ -23,6 +23,9 @@ L.LatLngUtil = {
 	// @method cloneLatLng(LatLng): L.LatLng
 	// Clone the latLng and return a new LatLng object.
 	cloneLatLng: function (latlng) {
+		if (latlng.alt) {
+			return L.latLng(latlng.lat, latlng.lng, latlng.alt);
+		}
 		return L.latLng(latlng.lat, latlng.lng);
 	}
 };
