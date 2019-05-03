@@ -65,6 +65,22 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		L.Draw.Feature.prototype.initialize.call(this, map, options);
 	},
 
+	_getIndoorOptions: function () {
+		if ("indoors" in this._map) {
+			if (this._map.indoors.isIndoors()) {
+				const indoorMapId = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
+				const indoorMapFloorId = this._map.indoors.getFloor().getFloorIndex();
+
+				return {
+					indoorMapId: indoorMapId,
+					indoorMapFloorId: indoorMapFloorId
+				};
+			}
+		}
+
+		return {};
+	},
+
 	// @method addHooks(): void
 	// Add listener hooks to this handler
 	addHooks: function () {
@@ -75,18 +91,10 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			this._markerGroup = new L.LayerGroup();
 			this._map.addLayer(this._markerGroup);
 
-			var polyOptions = this.options.shapeOptions;
-
-			if ("indoors" in this._map) {
-				if (this._map.indoors.isIndoors()) {
-					polyOptions['indoorMapId'] = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
-					polyOptions['indoorMapFloorId'] = this._map.indoors.getFloor().getFloorIndex();
-				}
-				else {
-					polyOptions['indoorMapId'] = null;
-					polyOptions['indoorMapFloorId'] = null;
-				}
-			}
+			const indoorMapOptions = this._getIndoorOptions();
+			var polyOptions = {};
+			Object.assign(polyOptions, this.options.shapeOptions);
+			Object.assign(polyOptions, indoorMapOptions);
 
 			this._poly = new L.Polyline([], polyOptions);
 
@@ -98,7 +106,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			// also do not want to trigger any click handlers of objects we are clicking on
 			// while drawing.
 			if (!this._mouseMarker) {
-				this._mouseMarker = L.marker(this._map.getCenter(), {
+				var markerOptions = {
 					icon: L.divIcon({
 						className: 'leaflet-mouse-marker',
 						iconAnchor: [20, 20],
@@ -106,7 +114,9 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 					}),
 					opacity: 0,
 					zIndexOffset: this.options.zIndexOffset
-				});
+				};
+				Object.assign(markerOptions, indoorMapOptions);
+				this._mouseMarker = L.marker(this._map.getCenter(), markerOptions);
 			}
 
 			this._mouseMarker
@@ -606,7 +616,10 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 	},
 
 	_fireCreatedEvent: function () {
-		var poly = new this.Poly(this._poly.getLatLngs(), this.options.shapeOptions);
+		var polyOptions = this._getIndoorOptions();
+		Object.assign(polyOptions, this.options.shapeOptions);
+
+		var poly = new this.Poly(this._poly.getLatLngs(), polyOptions);
 		L.Draw.Feature.prototype._fireCreatedEvent.call(this, poly);
 	}
 });

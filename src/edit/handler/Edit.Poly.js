@@ -209,8 +209,10 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		var latlngs = this._defaultShape(),
 			i, j, len, marker;
 
+		const markerOptions = indoorMapId ? { indoorMapId: indoorMapId, indoorMapFloorId: indoorMapFloorId} : {};
+
 		for (i = 0, len = latlngs.length; i < len; i++) {
-			marker = this._createMarker(latlngs[i], i, indoorMapId, indoorMapFloorId);
+			marker = this._createMarker(latlngs[i], markerOptions, i);
 			marker.on('click', this._onMarkerClick, this);
 			marker.on('contextmenu', this._onContextMenu, this);
 			this._markers.push(marker);
@@ -226,19 +228,23 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			markerLeft = this._markers[j];
 			markerRight = this._markers[i];
 
-			this._createMiddleMarker(markerLeft, markerRight, indoorMapId, indoorMapFloorId);
+			this._createMiddleMarker(markerLeft, markerRight, markerOptions);
 			this._updatePrevNext(markerLeft, markerRight);
 		}
 	},
 
-	_createMarker: function (latlng, index, indoorMapId, indoorMapFloorId) {
-		// Extending L.Marker in TouchEvents.js to include touch.
-		var marker = new L.Marker.Touch(latlng, {
+	_createMarker: function (latlng, options, index) {
+		var markerOptions = {
 			draggable: true,
-			icon: this.options.icon,
-			indoorMapId: indoorMapId,
-			indoorMapFloorId: indoorMapFloorId
-		});
+			icon: this.options.icon
+		}
+
+		if (options) {
+			Object.assign(markerOptions, options);
+		}
+
+		// Extending L.Marker in TouchEvents.js to include touch.
+		var marker = new L.Marker.Touch(latlng, markerOptions);
 
 		marker._origLatLng = latlng;
 		marker._index = index;
@@ -372,7 +378,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		if (marker._prev && marker._next) {
 			const indoorMapId = this._poly.options.indoorMapId;
 			const indoorMapFloorId = this._poly.options.indoorMapFloorId;
-			this._createMiddleMarker(marker._prev, marker._next, indoorMapId, indoorMapFloorId);
+
+			const markerOptions = indoorMapId ? { indoorMapId: indoorMapId, indoorMapFloorId: indoorMapFloorId} : {};
+			this._createMiddleMarker(marker._prev, marker._next, markerOptions);
 
 		} else if (!marker._prev) {
 			marker._next._middleLeft = null;
@@ -418,9 +426,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		});
 	},
 
-	_createMiddleMarker: function (marker1, marker2, indoorMapId, indoorMapFloorId) {
+	_createMiddleMarker: function (marker1, marker2, markerOptions) {
 		var latlng = this._getMiddleLatLng(marker1, marker2),
-			marker = this._createMarker(latlng, undefined, indoorMapId, indoorMapFloorId),
+			marker = this._createMarker(latlng, markerOptions),
 			onClick,
 			onDragStart,
 			onDragEnd;
@@ -461,9 +469,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 
 			const indoorMapId = this._poly.options.indoorMapId;
 			const indoorMapFloorId = this._poly.options.indoorMapFloorId;
-
-			this._createMiddleMarker(marker1, marker, indoorMapId, indoorMapFloorId);
-			this._createMiddleMarker(marker, marker2, indoorMapId, indoorMapFloorId);
+			const markerOptions = indoorMapId ? { indoorMapId: indoorMapId, indoorMapFloorId: indoorMapFloorId} : {};
+			this._createMiddleMarker(marker1, marker, markerOptions);
+			this._createMiddleMarker(marker, marker2, markerOptions);
 		};
 
 		onClick = function () {
