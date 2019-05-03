@@ -12,7 +12,7 @@ L.Map.TouchExtend = L.Handler.extend({
 	// Sets TouchExtend private accessor variables
 	initialize: function (map) {
 		this._map = map;
-		this._container = map._container;
+		this._container = map._container.parentElement;
 		this._pane = map._panes.overlayPane;
 	},
 

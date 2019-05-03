@@ -75,7 +75,20 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			this._markerGroup = new L.LayerGroup();
 			this._map.addLayer(this._markerGroup);
 
-			this._poly = new L.Polyline([], this.options.shapeOptions);
+			var polyOptions = this.options.shapeOptions;
+
+			if ("indoors" in this._map) {
+				if (this._map.indoors.isIndoors()) {
+					polyOptions['indoorMapId'] = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
+					polyOptions['indoorMapFloorId'] = this._map.indoors.getFloor().getFloorIndex();
+				}
+				else {
+					polyOptions['indoorMapId'] = null;
+					polyOptions['indoorMapFloorId'] = null;
+				}
+			}
+
+			this._poly = new L.Polyline([], polyOptions);
 
 			this._tooltip.updateContent(this._getTooltipText());
 
@@ -378,10 +391,17 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 	},
 
 	_createMarker: function (latlng) {
-		var marker = new L.Marker(latlng, {
+		var options = {
 			icon: this.options.icon,
 			zIndexOffset: this.options.zIndexOffset * 2
-		});
+		}
+
+		if ("indoors" in this._map && this._map.indoors.isIndoors()) {
+			options['indoorMapId'] = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
+			options['indoorMapFloorId'] = this._map.indoors.getFloor().getFloorIndex();
+		}
+
+		var marker = new L.Marker(latlng, options);
 
 		this._markerGroup.addLayer(marker);
 

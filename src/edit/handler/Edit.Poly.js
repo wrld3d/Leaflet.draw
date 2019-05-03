@@ -203,12 +203,14 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		}
 		this._markers = [];
 
+		const indoorMapId = this._poly.options.indoorMapId;
+		const indoorMapFloorId = this._poly.options.indoorMapFloorId;
+
 		var latlngs = this._defaultShape(),
 			i, j, len, marker;
 
 		for (i = 0, len = latlngs.length; i < len; i++) {
-
-			marker = this._createMarker(latlngs[i], i);
+			marker = this._createMarker(latlngs[i], i, indoorMapId, indoorMapFloorId);
 			marker.on('click', this._onMarkerClick, this);
 			marker.on('contextmenu', this._onContextMenu, this);
 			this._markers.push(marker);
@@ -224,16 +226,18 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			markerLeft = this._markers[j];
 			markerRight = this._markers[i];
 
-			this._createMiddleMarker(markerLeft, markerRight);
+			this._createMiddleMarker(markerLeft, markerRight, indoorMapId, indoorMapFloorId);
 			this._updatePrevNext(markerLeft, markerRight);
 		}
 	},
 
-	_createMarker: function (latlng, index) {
+	_createMarker: function (latlng, index, indoorMapId, indoorMapFloorId) {
 		// Extending L.Marker in TouchEvents.js to include touch.
 		var marker = new L.Marker.Touch(latlng, {
 			draggable: true,
 			icon: this.options.icon,
+			indoorMapId: indoorMapId,
+			indoorMapFloorId: indoorMapFloorId
 		});
 
 		marker._origLatLng = latlng;
@@ -366,7 +370,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 
 		// create a ghost marker in place of the removed one
 		if (marker._prev && marker._next) {
-			this._createMiddleMarker(marker._prev, marker._next);
+			const indoorMapId = this._poly.options.indoorMapId;
+			const indoorMapFloorId = this._poly.options.indoorMapFloorId;
+			this._createMiddleMarker(marker._prev, marker._next, indoorMapId, indoorMapFloorId);
 
 		} else if (!marker._prev) {
 			marker._next._middleLeft = null;
@@ -412,9 +418,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		});
 	},
 
-	_createMiddleMarker: function (marker1, marker2) {
+	_createMiddleMarker: function (marker1, marker2, indoorMapId, indoorMapFloorId) {
 		var latlng = this._getMiddleLatLng(marker1, marker2),
-			marker = this._createMarker(latlng),
+			marker = this._createMarker(latlng, undefined, indoorMapId, indoorMapFloorId),
 			onClick,
 			onDragStart,
 			onDragEnd;
@@ -453,8 +459,11 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			marker.off('dragend', onDragEnd, this);
 			marker.off('touchmove', onDragStart, this);
 
-			this._createMiddleMarker(marker1, marker);
-			this._createMiddleMarker(marker, marker2);
+			const indoorMapId = this._poly.options.indoorMapId;
+			const indoorMapFloorId = this._poly.options.indoorMapFloorId;
+
+			this._createMiddleMarker(marker1, marker, indoorMapId, indoorMapFloorId);
+			this._createMiddleMarker(marker, marker2, indoorMapId, indoorMapFloorId);
 		};
 
 		onClick = function () {
@@ -488,9 +497,11 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			p1 = map.project(latLng1),
 			p2 = map.project(latLng2);
 
+		const isIndoors = marker1.options.indoorMapId || marker2.options.indoorMapId;
+
 		const middle = map.unproject(p1._add(p2)._divideBy(2));
 		if (latLng1.alt && latLng2.alt) {
-			if ("getAltitudeAtLatLng" in map) {
+			if ("getAltitudeAtLatLng" in map && !isIndoors) {
 				return new L.LatLng(middle.lat, middle.lng, map.getAltitudeAtLatLng(middle));
 			}
 
