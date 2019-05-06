@@ -280,7 +280,6 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 
 		this._markerGroup.removeLayer(marker);
 		this._markers.splice(i, 1);
-		this._spliceLatLngs(i, 1);
 		this._updateIndexes(i, -1);
 
 		marker
@@ -300,6 +299,29 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		this._poly._map.fire(L.Draw.Event.EDITVERTEX, {layers: this._markerGroup, poly: this._poly});
 	},
 
+	_showIntersectionError: function () {
+		var poly = this._poly;
+		var tooltip = poly._map._editTooltip; // Access the tooltip
+		var originalColor = poly.options.original.color;
+		poly.setStyle({color: this.options.drawError.color});
+		if (tooltip) {
+			tooltip.updateContent({
+				text: L.drawLocal.draw.handlers.polyline.error
+			});
+		}
+
+		// Reset everything back to normal after a second
+		setTimeout(function () {
+			poly.setStyle({color: originalColor});
+			if (tooltip) {
+				tooltip.updateContent({
+					text: L.drawLocal.edit.handlers.edit.tooltip.text,
+					subtext: L.drawLocal.edit.handlers.edit.tooltip.subtext
+				});
+			}
+		}, 1000);
+	},
+
 	_onMarkerDrag: function (e) {
 		var marker = e.target;
 		var poly = this._poly;
@@ -307,30 +329,11 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		var oldOrigLatLng = L.LatLngUtil.cloneLatLng(marker._origLatLng);
 		L.extend(marker._origLatLng, marker._latlng);
 		if (poly.options.poly) {
-			var tooltip = poly._map._editTooltip; // Access the tooltip
-
 			// If we don't allow intersections and the polygon intersects
 			if (!poly.options.poly.allowIntersection && poly.intersects()) {
 				L.extend(marker._origLatLng, oldOrigLatLng);
 				marker.setLatLng(oldOrigLatLng);
-				var originalColor = poly.options.color;
-				poly.setStyle({color: this.options.drawError.color});
-				if (tooltip) {
-					tooltip.updateContent({
-						text: L.drawLocal.draw.handlers.polyline.error
-					});
-				}
-
-				// Reset everything back to normal after a second
-				setTimeout(function () {
-					poly.setStyle({color: originalColor});
-					if (tooltip) {
-						tooltip.updateContent({
-							text: L.drawLocal.edit.handlers.edit.tooltip.text,
-							subtext: L.drawLocal.edit.handlers.edit.tooltip.subtext
-						});
-					}
-				}, 1000);
+				this._showIntersectionError();
 			}
 		}
 
@@ -353,11 +356,24 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 	_onMarkerClick: function (e) {
 
 		var minPoints = L.Polygon && (this._poly instanceof L.Polygon) ? 4 : 3,
-			marker = e.target;
+			marker = e.target, 
+			poly = this._poly;
 
 		// If removing this point would create an invalid polyline/polygon don't remove
 		if (this._defaultShape().length < minPoints) {
 			return;
+		}
+
+		// If removing this point would create a seft intersecting polyline/polygon don't remove
+		var removed = this._spliceLatLngs(marker._index, 1);
+
+		if (poly.options.poly) {
+			// If we don't allow intersections and the polygon intersects
+			if (!poly.options.poly.allowIntersection && poly.intersects()) {
+				this._spliceLatLngs(marker._index, 0, removed[0]);
+				this._showIntersectionError();
+				return;
+			}
 		}
 
 		// remove the marker
@@ -394,7 +410,6 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 
 	_onContextMenu: function (e) {
 		var marker = e.target;
-		var poly = this._poly;
 		this._poly._map.fire(L.Draw.Event.MARKERCONTEXT, {marker: marker, layers: this._markerGroup, poly: this._poly});
 		L.DomEvent.stopPropagation;
 	},

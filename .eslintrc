@@ -1,6 +1,11 @@
 {
   "rules": {
-    "no-unused-vars": 0,
+    "no-unused-vars": [
+      "error", { 
+          "vars": "all", 
+          "args": "none" 
+      }
+    ],
     "quotes": 0,
     "no-shadow": 0,
     "no-irregular-whitespace": 0,
