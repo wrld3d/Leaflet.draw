@@ -41,6 +41,65 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 		this.type = L.Draw.Polygon.TYPE;
 	},
 
+	// @method addVertex(): void
+	// Add a vertex to the end of the polyline
+	addVertex: function (latlng) {
+		//Check if line from previous marker intersect with any other polyline.
+		if (!this._newVertexIsValid(latlng)) {
+			this._showErrorTooltip();
+			return;
+		}
+
+		L.Draw.Polyline.prototype.addVertex.call(this, latlng);
+	},
+
+	// @method completeShape(): void
+	// Closes the polyline between the first and last points
+	completeShape: function () {
+		if (!this._canFinishShape()) {
+			this._showErrorTooltip();
+			return;
+		}
+
+		L.Draw.Polyline.prototype.completeShape.call(this);
+	},
+
+	_newVertexIsValid: function (latlng) {
+		//Check if line from previous marker intersect with any other polyline.
+		if (!this.options.allowOverlap && this._markers.length > 0) {
+			const lastMarker = this._markers[this._markers.length - 1];
+			lastMarker._latlng;
+
+			if (L.PolyUtil.lineOverlapsPolygons(this._map, latlng, lastMarker._latlng)) {
+				return false;
+			}
+		}
+
+		return true;
+	},
+
+	_finishShape: function () {
+		if (!this._canFinishShape()) {
+			this._showErrorTooltip();
+			return;
+		}
+
+		L.Draw.Polyline.prototype._finishShape.call(this);
+	},
+
+	_canFinishShape: function () {
+		if (!this._shapeIsValid()) {
+			return false;
+		}
+
+		const latlng = this._markers[0]._latlng;
+		if (!this._newVertexIsValid(latlng)) {
+			return false;
+		}
+
+		return true;
+	},
+
 	_updateFinishHandler: function () {
 		var markerCount = this._markers.length;
 

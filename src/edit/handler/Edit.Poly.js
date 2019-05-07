@@ -329,8 +329,26 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		var oldOrigLatLng = L.LatLngUtil.cloneLatLng(marker._origLatLng);
 		L.extend(marker._origLatLng, marker._latlng);
 		if (poly.options.poly) {
+			var showError = false;
 			// If we don't allow intersections and the polygon intersects
 			if (!poly.options.poly.allowIntersection && poly.intersects()) {
+				showError = true;
+			}
+			// If we don't allow overlap and the polygon overlaps
+			if (!poly.options.poly.allowOverlap) {
+				if (marker._prev && !showError) {
+					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, marker._latlng, [poly])) {
+						showError = true;
+					}
+				}
+				if (marker._next && !showError) {
+					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._next._latlng, marker._latlng, [poly])) {
+						showError = true;
+					}
+				}
+			} 
+
+			if (showError) {
 				L.extend(marker._origLatLng, oldOrigLatLng);
 				marker.setLatLng(oldOrigLatLng);
 				this._showIntersectionError();
@@ -362,6 +380,16 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		// If removing this point would create an invalid polyline/polygon don't remove
 		if (this._defaultShape().length < minPoints) {
 			return;
+		}
+
+		if (poly.options.poly) {
+			// If removing will cause an overlap with another polygon dont remove
+			if (!poly.options.poly.allowOverlap && marker._prev && marker._next) {
+				if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, marker._next._latlng, [poly])) {
+					this._showIntersectionError();
+					return;
+				}
+			}
 		}
 
 		// If removing this point would create a seft intersecting polyline/polygon don't remove

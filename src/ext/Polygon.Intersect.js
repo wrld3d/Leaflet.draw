@@ -29,5 +29,34 @@ L.Polygon.include({
 
 		// Check the line segment between last and first point. Don't need to check the first line segment (minIndex = 1)
 		return this._lineSegmentsIntersectsRange(lastPoint, firstPoint, maxIndex, 1);
+	},
+
+	_lineSegmentIntersects: function (p ,p1) {
+		const points = this._getProjectedPoints();
+		const maxIndex = points.length - 1;
+		var p2, p3; 
+
+		if (points.length < 3) {
+			return false;
+		}
+
+		p2 = points[0];
+		p3 = points[maxIndex]
+
+		if (L.LineUtil.segmentsIntersect(p, p1, p2, p3)) {
+			return true;
+		}
+
+		// Check all line segments for intersections
+		for (var j = maxIndex; j > 0; j--) {
+			p2 = points[j - 1];
+			p3 = points[j];
+
+			if (L.LineUtil.segmentsIntersect(p, p1, p2, p3)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 });

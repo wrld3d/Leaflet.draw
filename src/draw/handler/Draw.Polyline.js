@@ -12,6 +12,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 
 	options: {
 		allowIntersection: true,
+		allowOverlap: true,
 		repeatMode: false,
 		drawError: {
 			color: '#b00b00',
