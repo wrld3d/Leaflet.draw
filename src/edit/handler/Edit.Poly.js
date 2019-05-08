@@ -300,13 +300,21 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 	},
 
 	_showIntersectionError: function () {
+		this._showError(L.drawLocal.draw.handlers.polyline.error);
+	},
+
+	_showOverlapError: function () {
+		this._showError(L.drawLocal.draw.handlers.polyline.overlaperror);
+	},
+
+	_showError: function (message) {
 		var poly = this._poly;
 		var tooltip = poly._map._editTooltip; // Access the tooltip
 		var originalColor = poly.options.original.color;
 		poly.setStyle({color: this.options.drawError.color});
 		if (tooltip) {
 			tooltip.updateContent({
-				text: L.drawLocal.draw.handlers.polyline.error
+				text: message
 			});
 		}
 
@@ -329,29 +337,31 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		var oldOrigLatLng = L.LatLngUtil.cloneLatLng(marker._origLatLng);
 		L.extend(marker._origLatLng, marker._latlng);
 		if (poly.options.poly) {
-			var showError = false;
+			var revertDrag = false;
 			// If we don't allow intersections and the polygon intersects
 			if (!poly.options.poly.allowIntersection && poly.intersects()) {
-				showError = true;
+				revertDrag = true;
+				this._showIntersectionError();
 			}
 			// If we don't allow overlap and the polygon overlaps
 			if (!poly.options.poly.allowOverlap) {
-				if (marker._prev && !showError) {
+				if (marker._prev && !revertDrag) {
 					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, marker._latlng, [poly])) {
-						showError = true;
+						revertDrag = true;
+						this._showOverlapError();
 					}
 				}
-				if (marker._next && !showError) {
+				if (marker._next && !revertDrag) {
 					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._next._latlng, marker._latlng, [poly])) {
-						showError = true;
+						revertDrag = true;
+						this._showOverlapError();
 					}
 				}
 			} 
 
-			if (showError) {
+			if (revertDrag) {
 				L.extend(marker._origLatLng, oldOrigLatLng);
 				marker.setLatLng(oldOrigLatLng);
-				this._showIntersectionError();
 			}
 		}
 
@@ -386,7 +396,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			// If removing will cause an overlap with another polygon dont remove
 			if (!poly.options.poly.allowOverlap && marker._prev && marker._next) {
 				if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, marker._next._latlng, [poly])) {
-					this._showIntersectionError();
+					this._showOverlapError();
 					return;
 				}
 			}

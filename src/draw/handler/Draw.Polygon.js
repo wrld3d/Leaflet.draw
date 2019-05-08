@@ -46,7 +46,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 	addVertex: function (latlng) {
 		//Check if line from previous marker intersect with any other polyline.
 		if (!this._newVertexIsValid(latlng)) {
-			this._showErrorTooltip();
+			this._showErrorTooltip(this.options.drawError.overlapmessage);
 			return;
 		}
 
@@ -57,7 +57,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 	// Closes the polyline between the first and last points
 	completeShape: function () {
 		if (!this._canFinishShape()) {
-			this._showErrorTooltip();
+			this._showErrorTooltip(this.options.drawError.overlapmessage);
 			return;
 		}
 
@@ -86,7 +86,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 
 	_finishShape: function () {
 		if (!this._canFinishShape()) {
-			this._showErrorTooltip();
+			this._showErrorTooltip(this.options.drawError.overlapmessage);
 			return;
 		}
 

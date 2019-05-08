@@ -131,6 +131,7 @@ L.drawLocal = {
 			},
 			polyline: {
 				error: '<strong>Error:</strong> shape edges cannot cross!',
+				overlaperror: '<strong>Error:</strong> shapes cannot overlap!',
 				tooltip: {
 					start: 'Click to start drawing line.',
 					cont: 'Click to continue drawing line.',

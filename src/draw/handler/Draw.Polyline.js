@@ -54,6 +54,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 
 		// Need to set this here to ensure the correct message is used.
 		this.options.drawError.message = L.drawLocal.draw.handlers.polyline.error;
+		this.options.drawError.overlapmessage = L.drawLocal.draw.handlers.polyline.overlaperror;
 
 		// Merge default drawError options with custom options
 		if (options && options.drawError) {
@@ -203,7 +204,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		var markersLength = this._markers.length;
 		// markersLength must be greater than or equal to 2 before intersections can occur
 		if (markersLength >= 2 && !this.options.allowIntersection && this._poly.newLatLngIntersects(latlng)) {
-			this._showErrorTooltip();
+			this._showErrorTooltip(this.options.drawError.message);
 			return;
 		}
 		else if (this._errorShown) {
@@ -241,7 +242,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		var intersects = this._poly.newLatLngIntersects(latlngs[latlngs.length - 1]);
 
 		if ((!this.options.allowIntersection && intersects) || !this._shapeIsValid()) {
-			this._showErrorTooltip();
+			this._showErrorTooltip(this.options.drawError.message);
 			return;
 		}
 
@@ -558,13 +559,13 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		return L.GeometryUtil.readableDistance(distance, this.options.metric, this.options.feet, this.options.nautic, this.options.precision);
 	},
 
-	_showErrorTooltip: function () {
+	_showErrorTooltip: function (message) {
 		this._errorShown = true;
 
 		// Update tooltip
 		this._tooltip
 			.showAsError()
-			.updateContent({text: this.options.drawError.message});
+			.updateContent({text: message});
 
 		// Update shape
 		this._updateGuideColor(this.options.drawError.color);
