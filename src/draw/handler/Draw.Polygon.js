@@ -66,12 +66,18 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 
 	_newVertexIsValid: function (latlng) {
 		//Check if line from previous marker intersect with any other polyline.
-		if (!this.options.allowOverlap && this._markers.length > 0) {
-			const lastMarker = this._markers[this._markers.length - 1];
-			lastMarker._latlng;
-
-			if (L.PolyUtil.lineOverlapsPolygons(this._map, latlng, lastMarker._latlng)) {
+		if (!this.options.allowOverlap) {
+			if (L.PolyUtil.pointOverlapsPolygons(this._map, latlng)) {
 				return false;
+			}
+
+			if (this._markers.length > 0) {
+				const lastMarker = this._markers[this._markers.length - 1];
+				lastMarker._latlng;
+
+				if (L.PolyUtil.lineOverlapsPolygons(this._map, latlng, lastMarker._latlng)) {
+					return false;
+				}
 			}
 		}
 
@@ -89,6 +95,10 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 
 	_canFinishShape: function () {
 		if (!this._shapeIsValid()) {
+			return false;
+		}
+
+		if (L.PolyUtil.checkPolygonOverlapsOthers(this._map, this._poly)) {
 			return false;
 		}
 

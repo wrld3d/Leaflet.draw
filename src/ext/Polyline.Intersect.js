@@ -102,5 +102,23 @@ L.Polyline.include({
 			points.push(this._map.latLngToLayerPoint(_shape[i]));
 		}
 		return points;
+	},
+
+	_pointInside: function(p) {
+		//Adapted from https://stackoverflow.com/a/31813714
+		var x = p.x, y = p.y;
+		const points = this._getProjectedPoints();
+
+		var inside = false;
+		for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
+			var xi = points[i].x, yi = points[i].y;
+			var xj = points[j].x, yj = points[j].y;
+
+			var intersect = ((yi > y) != (yj > y))
+				&& (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+			if (intersect) inside = !inside;
+		}
+
+		return inside;
 	}
 });
