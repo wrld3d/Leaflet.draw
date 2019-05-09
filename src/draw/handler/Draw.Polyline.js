@@ -71,7 +71,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		if ("indoors" in this._map) {
 			if (this._map.indoors.isIndoors()) {
 				const indoorMapId = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
-				const indoorMapFloorId = this._map.indoors.getFloor().getFloorIndex();
+				const indoorMapFloorId = this._map.indoors.getFloor()._getFloorId();
 
 				return {
 					indoorMapId: indoorMapId,
@@ -410,7 +410,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 
 		if ("indoors" in this._map && this._map.indoors.isIndoors()) {
 			options['indoorMapId'] = this._map.indoors.getActiveIndoorMap().getIndoorMapId();
-			options['indoorMapFloorId'] = this._map.indoors.getFloor().getFloorIndex();
+			options['indoorMapFloorId'] = this._map.indoors.getFloor()._getFloorId();
 		}
 
 		var marker = new L.Marker(latlng, options);
