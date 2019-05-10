@@ -53,17 +53,6 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 		L.Draw.Polyline.prototype.addVertex.call(this, latlng);
 	},
 
-	// @method completeShape(): void
-	// Closes the polyline between the first and last points
-	completeShape: function () {
-		if (!this._canFinishShape()) {
-			this._showErrorTooltip(this.options.drawError.overlapmessage);
-			return;
-		}
-
-		L.Draw.Polyline.prototype.completeShape.call(this);
-	},
-
 	_newVertexIsValid: function (latlng) {
 		//Check if line from previous marker intersect with any other polyline.
 		if (!this.options.allowOverlap) {
