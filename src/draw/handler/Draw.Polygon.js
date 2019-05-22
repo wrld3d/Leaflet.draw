@@ -8,7 +8,10 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 		TYPE: 'polygon'
 	},
 
-	Poly: L.Polygon,
+	// NOTE: wrld.js overrides L.polygon with an extended version that handles our projected transforms.
+	// L.Polygon however, refers the base Leaflet Polygon type and is used internally by L.polygon.
+	// This could maybe do with a rethink, but for now instantiate the extended 'shimmed' version.
+	Poly: L.polygon,
 
 	options: {
 		showArea: false,
