@@ -228,18 +228,13 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		if (this._markers.length <= 1 || !this._shapeIsValid()) {
 			return;
 		}
-
-		this._fireCreatedEvent();
-		this.disable();
-
-		if (this.options.repeatMode) {
-			this.enable();
-		}
+		
+		this._finishShape();
 	},
 
 	_finishShape: function () {
 		var latlngs = this._poly._defaultShape ? this._poly._defaultShape() : this._poly.getLatLngs();
-		var intersects = this._poly.newLatLngIntersects(latlngs[latlngs.length - 1]);
+		var intersects = this._poly.newLatLngIntersects(latlngs[0], true);
 
 		if ((!this.options.allowIntersection && intersects) || !this._shapeIsValid()) {
 			this._showErrorTooltip(this.options.drawError.message);
