@@ -31,6 +31,8 @@ L.EditToolbar.Delete = L.Handler.extend({
 			L.EditToolbar.Delete.include(L.Mixin.Events);
 		}
 
+		this._map = map;
+
 	},
 
 	// @method enable(): void
@@ -106,6 +108,7 @@ L.EditToolbar.Delete = L.Handler.extend({
 		// Iterate of the deleted layers and add them back into the featureGroup
 		this._deletedLayers.eachLayer(function (layer) {
 			this._deletableLayers.addLayer(layer);
+			this._map.addLayer(layer);
 			layer.fire('revert-deleted', {layer: layer});
 		}, this);
 	},
@@ -147,6 +150,8 @@ L.EditToolbar.Delete = L.Handler.extend({
 		this._deletableLayers.removeLayer(layer);
 
 		this._deletedLayers.addLayer(layer);
+
+		this._map.removeLayer(layer);
 
 		layer.fire('deleted');
 	},
