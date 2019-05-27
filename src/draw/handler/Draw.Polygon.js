@@ -90,12 +90,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 			return false;
 		}
 
-		if (L.PolyUtil.checkPolygonOverlapsOthers(this._map, this._poly)) {
-			return false;
-		}
-
-		const latlng = this._markers[0]._latlng;
-		if (!this._newVertexIsValid(latlng)) {
+		if (!this.options.allowOverlap && L.PolyUtil.checkPolygonOverlapsOthers(this._map, this._poly)) {
 			return false;
 		}
 
