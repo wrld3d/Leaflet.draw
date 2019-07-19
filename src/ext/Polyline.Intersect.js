@@ -101,9 +101,6 @@ L.Polyline.include({
 
 		for (var i = 0; i < _shape.length; i++) {
 			var latlng = L.LatLngUtil.cloneLatLngWithoutAlt(_shape[i]);
-			if (latlng.alt != undefined) {
-				latlng = L.latLng(latlng.lat, latlng.lng);
-			}
 			points.push(this._map.latLngToLayerPoint(latlng));
 		}
 		return points;
