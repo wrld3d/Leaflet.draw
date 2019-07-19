@@ -9,9 +9,11 @@ L.Util.extend(L.PolyUtil, {
 	// Checks to see if a line overlaps any polygons
 	lineOverlapsPolygons: function (map, latlngStart, latlngEnd, ignoredPolys) {
 		if (map) {
-			const p = map.latLngToLayerPoint(latlngStart);
-			const p1 = map.latLngToLayerPoint(latlngEnd);
-			const bounds = [latlngStart, latlngEnd];
+			var start = L.LatLngUtil.cloneLatLngWithoutAlt(latlngStart);
+			var end = L.LatLngUtil.cloneLatLngWithoutAlt(latlngEnd);
+			const p = map.latLngToLayerPoint(start);
+			const p1 = map.latLngToLayerPoint(end);
+			const bounds = [start, end];
 
 			for (var f in map._layers) {
 				const feature = map._layers[f];
@@ -34,8 +36,9 @@ L.Util.extend(L.PolyUtil, {
 	// Checks to see if a point is inside another polygon
 	pointOverlapsPolygons: function (map, latlng, ignoredPolys) {
 		if (map) {
-			const p = map.latLngToLayerPoint(latlng);
-			const bounds = [latlng, latlng];
+			var latlngWithoutAlt = L.LatLngUtil.cloneLatLngWithoutAlt(latlng);
+			const p = map.latLngToLayerPoint(latlngWithoutAlt);
+			const bounds = [latlngWithoutAlt, latlngWithoutAlt];
 
 			for (var f in map._layers) {
 				const feature = map._layers[f];

@@ -243,8 +243,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			Object.assign(markerOptions, options);
 		}
 
-		// Extending L.Marker in TouchEvents.js to include touch.
-		var marker = new L.Marker.Touch(latlng, markerOptions);
+		var marker = new L.marker(latlng, markerOptions);
 
 		marker._origLatLng = latlng;
 		marker._index = index;

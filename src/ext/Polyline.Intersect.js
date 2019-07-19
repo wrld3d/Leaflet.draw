@@ -38,7 +38,8 @@ L.Polyline.include({
 			return false;
 		}
 
-		return this.newPointIntersects(this._map.latLngToLayerPoint(latlng), skipFirst);
+		var latlngWithoutAlt = L.LatLngUtil.cloneLatLngWithoutAlt(latlng);
+		return this.newPointIntersects(this._map.latLngToLayerPoint(latlngWithoutAlt), skipFirst);
 	},
 
 	// @method newPointIntersects(): boolean
@@ -99,7 +100,11 @@ L.Polyline.include({
 			_shape = this._defaultShape();
 
 		for (var i = 0; i < _shape.length; i++) {
-			points.push(this._map.latLngToLayerPoint(_shape[i]));
+			var latlng = L.LatLngUtil.cloneLatLngWithoutAlt(_shape[i]);
+			if (latlng.alt != undefined) {
+				latlng = L.latLng(latlng.lat, latlng.lng);
+			}
+			points.push(this._map.latLngToLayerPoint(latlng));
 		}
 		return points;
 	},
