@@ -8,7 +8,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		TYPE: 'polyline'
 	},
 
-	Poly: L.Polyline,
+	Poly: L.polyline,
 
 	options: {
 		allowIntersection: true,
@@ -98,7 +98,8 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			Object.assign(polyOptions, this.options.shapeOptions);
 			Object.assign(polyOptions, indoorMapOptions);
 
-			this._poly = new L.Polyline([], polyOptions);
+			this._poly = L.polyline([], polyOptions);
+			this._poly._map = this._map;
 
 			this._tooltip.updateContent(this._getTooltipText());
 
@@ -408,7 +409,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			options['indoorMapFloorId'] = this._map.indoors.getFloor()._getFloorId();
 		}
 
-		var marker = new L.Marker(latlng, options);
+		var marker = L.marker(latlng, options);
 
 		this._markerGroup.addLayer(marker);
 

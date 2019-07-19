@@ -47,6 +47,12 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 	// @method addVertex(): void
 	// Add a vertex to the end of the polyline
 	addVertex: function (latlng) {
+
+		//If we are indoors then ignore alt as we want to be at floor level
+		if ("indoors" in this._map && this._map.indoors.isIndoors()) {
+			latlng = L.LatLngUtil.cloneLatLngWithoutAlt(latlng);
+		}
+
 		//Check if line from previous marker intersect with any other polyline.
 		if (!this._newVertexIsValid(latlng)) {
 			this._showErrorTooltip(this.options.drawError.overlapmessage);

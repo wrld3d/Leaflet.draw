@@ -243,8 +243,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			Object.assign(markerOptions, options);
 		}
 
-		// Extending L.Marker in TouchEvents.js to include touch.
-		var marker = new L.Marker.Touch(latlng, markerOptions);
+		var marker = new L.marker(latlng, markerOptions);
 
 		marker._origLatLng = latlng;
 		marker._index = index;
@@ -333,9 +332,15 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 	_onMarkerDrag: function (e) {
 		var marker = e.target;
 		var poly = this._poly;
+		var latlng = marker._latlng;
 
 		var oldOrigLatLng = L.LatLngUtil.cloneLatLng(marker._origLatLng);
-		L.extend(marker._origLatLng, marker._latlng);
+
+		if (oldOrigLatLng.alt == undefined) {
+			latlng = L.LatLngUtil.cloneLatLngWithoutAlt(marker._latlng);
+		}
+
+		L.extend(marker._origLatLng, latlng);
 		if (poly.options.poly) {
 			var revertDrag = false;
 			// If we don't allow intersections and the polygon intersects
@@ -346,13 +351,13 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			// If we don't allow overlap and the polygon overlaps
 			if (!poly.options.poly.allowOverlap) {
 				if (marker._prev && !revertDrag) {
-					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, marker._latlng, [poly])) {
+					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._prev._latlng, latlng, [poly])) {
 						revertDrag = true;
 						this._showOverlapError();
 					}
 				}
 				if (marker._next && !revertDrag) {
-					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._next._latlng, marker._latlng, [poly])) {
+					if (L.PolyUtil.lineOverlapsPolygons(this._map, marker._next._latlng, latlng, [poly])) {
 						revertDrag = true;
 						this._showOverlapError();
 					}
@@ -361,6 +366,9 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 
 			if (revertDrag) {
 				L.extend(marker._origLatLng, oldOrigLatLng);
+				if (oldOrigLatLng.alt == undefined) {
+					oldOrigLatLng.alt = marker._latlng.alt;
+				}
 				marker.setLatLng(oldOrigLatLng);
 			}
 		}

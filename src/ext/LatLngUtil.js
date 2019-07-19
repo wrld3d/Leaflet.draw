@@ -27,5 +27,13 @@ L.LatLngUtil = {
 			return L.latLng(latlng.lat, latlng.lng, latlng.alt);
 		}
 		return L.latLng(latlng.lat, latlng.lng);
-	}
+	},
+
+	// @method cloneLatLngWithoutAlt(LatLng): L.LatLng
+	// Clone the latLng and return a new LatLng object without altitude.
+	cloneLatLngWithoutAlt: function (latlng) {
+		return L.latLng(latlng.lat, latlng.lng);
+	},
+
+	
 };
